@@ -9,7 +9,7 @@ void FindRoots(double a, double b, double c, double* x1, double* x2)
 			printf("ERROR\n");
 		else
 		{
-			printf("%lf\n", -c / b);
+			printf("%lg\n", -c / b);
 		}
 	}
 	else 
@@ -18,13 +18,13 @@ void FindRoots(double a, double b, double c, double* x1, double* x2)
 		{
 			*x1 = (-b - sqrt(b * b - 4 * a * c)) / 2 / a;
 			*x2 = (-b + sqrt(b * b - 4 * a * c)) / 2 / a;
-			printf("x1 = %lf, x2 = %lf\n", x1, x2);
+			printf("x1 = %lg  x2 = %lg\n", *x1, *x2);
 		}
 		else
 		{
 			if (b * b - 4 * a * c == 0)
 			{
-				printf("%lf\n", -b / 2 / a);
+				printf("%lg\n", -b / 2 / a);
 			}
 			else
 			{
@@ -38,8 +38,7 @@ main()
 	printf(" Quadratic equation solver\n");
 	printf(" ENTER a, b, c :\n");
 	double a = 0, b = 0, c = 0;
-	scanf("&a = %lf, &b = %lf, &c = %lf", &a, &b, &c);
+	scanf_s("%lg %lg %lg", &a, &b, &c);
 	double x1 = 0, x2 = 0;
 	FindRoots(a, b, c, &x1, &x2);
-	return 0;
 }
