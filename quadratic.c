@@ -54,7 +54,7 @@ int main()
 		printf("NO ROOTS\n");
 		break;
 	case -1:
-		printf("roots do not exist or their number is infinite");
+		printf("INFINITY OF ROOTS");
 		break;
 	default:
 		printf("ERROR");
