@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <math.h>
 #include <assert.h>
+
 #define Epsilon 0.000001
+#define ErrorCode -999
 
 int QuadrRoots(double a, double b, double c, double* x1, double* x2);
 
-int Linear(double b, double c, double* x);
+int LinearRoot(double b, double c, double* x);
 
 int areEqual(double x, double y);
 
@@ -16,8 +18,8 @@ int main()
 	double a = 0, b = 0, c = 0;
 	scanf("%lg %lg %lg", &a, &b, &c);
 	double x1 = 0, x2 = 0;
-	int number = QuadrRoots(a, b, c, &x1, &x2);
-	switch (number)
+	int numberOfRoots = QuadrRoots(a, b, c, &x1, &x2);
+	switch (numberOfRoots)
 	{
 	case 2:
 		printf("x1 = %lg  x2 = %lg\n", x1, x2);
@@ -33,16 +35,16 @@ int main()
 		break;
 	default:
 		printf("ERROR\n");
-		return -1;
+		return ErrorCode;
 	}
 	return 0;
 }
 int QuadrRoots(double a, double b, double c, double* x1, double* x2)
 {
 	assert(x1 != NULL && x2 != NULL);
-	double D = b * b - 4 * a * c;
 	if (!areEqual(a, 0)) 
 	{
+	double D = b * b - 4 * a * c;
 		if (D >= 0)
 		{
 			double sqrtD = sqrt(D);
@@ -56,9 +58,9 @@ int QuadrRoots(double a, double b, double c, double* x1, double* x2)
 		}
 		return 0;		
 	}
-	return Linear(b, c, x1);
+	return LinearRoot(b, c, x1);
 }
-int Linear(double b, double c, double* x)
+int LinearRoot(double b, double c, double* x)
 {
 	assert(x != NULL);
 	if (areEqual(b, 0))
