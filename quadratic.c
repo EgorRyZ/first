@@ -2,8 +2,13 @@
 #include <math.h>
 #include <assert.h>
 
+enum ReturnCodes
+{
+	InfOfRoots = -1,
+	ErrorCode = -111
+};
+
 #define Epsilon 0.000001
-#define ErrorCode -999
 
 int QuadrRoots(double a, double b, double c, double* x1, double* x2);
 
@@ -16,7 +21,11 @@ int main()
 	printf(" Quadratic equation solver\n");
 	printf(" ENTER a, b, c :\n");
 	double a = 0, b = 0, c = 0;
-	scanf("%lg %lg %lg", &a, &b, &c);
+	int inputNum = scanf("%lg %lg %lg", &a, &b, &c);
+	if (inputNum != 3)
+	{
+		return ErrorCode;	
+	}
 	double x1 = 0, x2 = 0;
 	int numberOfRoots = QuadrRoots(a, b, c, &x1, &x2);
 	switch (numberOfRoots)
@@ -30,7 +39,7 @@ int main()
 	case 0:
 		printf("NO ROOTS\n");
 		break;
-	case -1:
+	case InfOfRoots:
 		printf("INFINITY OF ROOTS\n");
 		break;
 	default:
@@ -67,7 +76,7 @@ int LinearRoot(double b, double c, double* x)
 	{
 		if (areEqual(c, 0))
 		{
-			return -1;
+			return InfOfRoots;
 		}
 		return 0;
 	}	
