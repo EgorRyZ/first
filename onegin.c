@@ -26,8 +26,7 @@ int main()
 	char *path1 = "C://C/c/yevgeniy-onegin.txt";
 	char *path2 = "C://C/sorted.txt";
 	
-	int numOfLines = 400;
-//	= NumOfLines(path1);
+	int numOfLines = NumOfLines(path1);
 	
 	int lineNumber[numOfLines];
 
