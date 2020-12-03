@@ -4,11 +4,6 @@
 #include <assert.h>
 #include <stdlib.h>
 
-enum ReturnCodes
-{
-	FileError = -1
-};
-
 int NumOfLines(char *path);
 
 int MaxLength(char *path);
