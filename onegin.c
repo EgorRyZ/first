@@ -39,7 +39,6 @@ int main()
 	char *fromFile = "C://C/onegin/yevgeniy-onegin.txt";
 	char *toFile = "C://C/onegin/sorted.txt";
 	
-	
 	int numOfLines = NumOfLines(fromFile);
 	int maxLength = MaxLength(fromFile);
 	if(maxLength == ERRORCODE || numOfLines == ERRORCODE)
@@ -69,7 +68,7 @@ int NumOfLines(char *path)
 	while((c = getc(file)) != EOF)
 	{
 		if(c == '\n')
-        	n++;
+        		n++;
 	}
 	fclose(file);
 	return n;
@@ -87,7 +86,7 @@ int MaxLength(char *path)
 	while((c = getc(file)) != EOF)
 	{
 		if(c != '\n')
-        	n++;
+        		n++;
 		else
 		{
 			if(n > max)
