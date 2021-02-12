@@ -3,11 +3,8 @@
 #include <wchar.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <sys\stat.h>
 
-enum ReturnCodes
-{
-	ERRORCODE = -123
-};
 typedef struct
 {
 	wchar_t *symbol;
@@ -16,21 +13,22 @@ typedef struct
 typedef struct
 {
 	LINE *line;
+	int numOfLines;
 }TEXT;
 
-int NumOfLines(char *path);
+int NumOfLines(int *fileArr, int length);
 
-int MaxLength(char *path);
+int MaxLength(int *fileArr, int length);
 
-void ReadText(char *path, TEXT text);
+TEXT ReadText(char *path);
 
-void StrSort(TEXT text, int numOfLines);
+void StrSort(TEXT text);
 
 void StrSwap(wchar_t **str1, wchar_t **str2);
 
 int Compare(wchar_t *str1, wchar_t *str2);
 
-void WriteText(char *path, TEXT text, int numOfLines);
+void WriteText(char *path, TEXT text);
 
 int main()
 {
@@ -38,92 +36,85 @@ int main()
 	
 	char *fromFile = "C://C/onegin/yevgeniy-onegin.txt";
 	char *toFile = "C://C/onegin/sorted.txt";
-	
-	int numOfLines = NumOfLines(fromFile);
-	int maxLength = MaxLength(fromFile);
-	if(maxLength == ERRORCODE || numOfLines == ERRORCODE)
-	{
-		printf("%d", ERRORCODE);
-		return ERRORCODE;
-	}
-	TEXT text;
-	text.line = (LINE*)malloc(sizeof(LINE) * numOfLines);
-	for(int i = 0; i < numOfLines; i++)
-		text.line[i].symbol = (wchar_t*)malloc(sizeof(wchar_t) * maxLength);
-	ReadText(fromFile, text);
-	StrSort(text, numOfLines);
-	WriteText(toFile, text, numOfLines);
+
+	TEXT text = ReadText(fromFile);
+	StrSort(text);
+	WriteText(toFile, text);
 	
 	return 0;
 }
 
-int NumOfLines(char *path)
+int NumOfLines(int *fileArr, int length)
 {
-	FILE *file;
-	file = fopen(path, "r");
-	if(file == NULL)
-		return ERRORCODE;
-	int c;
-	int n = 0;
-	while((c = getc(file)) != EOF)
+	int num = 0;
+	for(int i = 0; i < length; i++)
 	{
-		if(c == '\n')
-        		n++;
+		if(fileArr[i] == '\n')
+			num++;
 	}
-	fclose(file);
-	return n;
+	return num;
 }
 
-int MaxLength(char *path)
+int MaxLength(int *fileArr, int length)
 {
-	FILE *file;
-	file = fopen(path, "r");
-	if(file == NULL)
-		return ERRORCODE;
-	int c;
-	int max = 0;
-	int n = 0;
-	while((c = getc(file)) != EOF)
+	int max = 0, num = 0;
+	for(int i = 0; i < length; i++)
 	{
-		if(c != '\n')
-        		n++;
-		else
+		num++;
+		if(fileArr[i] == '\n')
 		{
-			if(n > max)
-				max = n;
-			n = 0;
+			if(max < num)
+				max = num;
+			num = 0;
 		}
 	}
-	fclose(file);
 	return max;
 }
 
-void ReadText(char *path, TEXT text)
+TEXT ReadText(char *path)
 {
-	assert(text.line != NULL);
 	FILE *file;
 	file = fopen(path, "r");
+	if(file == NULL)
+		printf("FILE NOT FOUND");
 	assert(file != NULL);
-	int c, i = 0, j = 0;
+	struct stat statbuf;
+	fstat(fileno(file), &statbuf);
+	int length = statbuf.st_size;
+	int fileArr[length];
+	int c, i = 0;
 	while((c = getc(file)) != EOF)
 	{
-		text.line[i].symbol[j] = c;
-		j++;
-		if(c == '\n')
-		{
-			i++;
-			j = 0;
-		}
+		fileArr[i++] = c;
 	}
+	length = i;
 	fclose(file);
+	
+	TEXT text;
+	text.numOfLines = NumOfLines(fileArr, length);
+	int maxLength = MaxLength(fileArr, length);
+	text.line = malloc(sizeof(text.line) * text.numOfLines);
+	for(int n = 0; n < text.numOfLines; n++)
+		text.line[n].symbol = malloc(sizeof(text.line[n].symbol) * maxLength);
+	int k = 0, j = 0;
+	for(int i = 0; i < length; i++)
+	{
+			text.line[k].symbol[j++] = fileArr[i];
+			if(fileArr[i] == '\n')
+			{
+				k++;
+				j = 0;
+			}
+	}
+	return text;
 }
 
-void StrSort(TEXT text, int numOfLines)
+void StrSort(TEXT text)
 {
 	assert(text.line != NULL);
-	for(int i = 0; i < numOfLines - 1; i++)
+	for(int i = 0; i < text.numOfLines - 1; i++)
 	{
-		for(int j = 1; j < numOfLines - i; j++)
+		for(int j = 1; j < text.numOfLines - i; j++)
 		{
 			if(Compare(text.line[j - 1].symbol, text.line[j].symbol))
 				StrSwap(&text.line[j - 1].symbol, &text.line[j].symbol);
@@ -155,12 +146,12 @@ int Compare(wchar_t *str1, wchar_t *str2)
 	}		
 }
 
-void WriteText(char *path, TEXT text, int numOfLines)
+void WriteText(char *path, TEXT text)
 {
 	assert(text.line != NULL);
 	FILE *file;
 	file = fopen(path, "a");
-	for(int i = 0; i < numOfLines; i++)
+	for(int i = 0; i < text.numOfLines; i++)
 	{
 		int c, j = 0;
 		while((c = text.line[i].symbol[j]) != '\n')
@@ -172,6 +163,3 @@ void WriteText(char *path, TEXT text, int numOfLines)
 	}
 	fclose(file);
 }
-
-
-
