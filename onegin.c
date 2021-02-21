@@ -8,6 +8,7 @@
 typedef struct
 {
 	wchar_t *symbol;
+	int strLength;
 }LINE;
 
 typedef struct
@@ -18,13 +19,15 @@ typedef struct
 
 int NumOfLines(int *fileArr, int length);
 
-int MaxLength(int *fileArr, int length);
-
 TEXT ReadText(char *path);
+
+TEXT TextStruct(int *fileArr, int length);
 
 void StrSort(TEXT text);
 
 void StrSwap(wchar_t **str1, wchar_t **str2);
+
+void Swap(int *a, int *b);
 
 int Compare(wchar_t *str1, wchar_t *str2);
 
@@ -38,7 +41,9 @@ int main()
 	char *toFile = "C://C/onegin/sorted.txt";
 
 	TEXT text = ReadText(fromFile);
+	
 	StrSort(text);
+	
 	WriteText(toFile, text);
 	
 	return 0;
@@ -55,34 +60,19 @@ int NumOfLines(int *fileArr, int length)
 	return num;
 }
 
-int MaxLength(int *fileArr, int length)
-{
-	int max = 0, num = 0;
-	for(int i = 0; i < length; i++)
-	{
-		num++;
-		if(fileArr[i] == '\n')
-		{
-			if(max < num)
-				max = num;
-			num = 0;
-		}
-	}
-	return max;
-}
-
 TEXT ReadText(char *path)
 {
-	FILE *file;
-	file = fopen(path, "r");
+	FILE *file = fopen(path, "r");
 	if(file == NULL)
 		printf("FILE NOT FOUND");
 	assert(file != NULL);
+	
 	struct stat statbuf;
 	fstat(fileno(file), &statbuf);
 	int length = statbuf.st_size;
-	int fileArr[length];
-	int c, i = 0;
+	
+	int *fileArr = calloc(length, sizeof(*fileArr));
+	int c = 0, i = 0;
 	while((c = getc(file)) != EOF)
 	{
 		fileArr[i++] = c;
@@ -90,22 +80,34 @@ TEXT ReadText(char *path)
 	length = i;
 	fclose(file);
 	
+	TEXT text = TextStruct(fileArr, length);
+	return text;
+}
+
+TEXT TextStruct(int *fileArr, int length)
+{
 	TEXT text;
 	text.numOfLines = NumOfLines(fileArr, length);
-	int maxLength = MaxLength(fileArr, length);
-	text.line = malloc(sizeof(text.line) * text.numOfLines);
-	for(int n = 0; n < text.numOfLines; n++)
-		text.line[n].symbol = malloc(sizeof(text.line[n].symbol) * maxLength);
-	int k = 0, j = 0;
+	text.line = calloc(text.numOfLines, sizeof(*(text.line)));
+	
+	int strnum = 0;
 	for(int i = 0; i < length; i++)
 	{
-			text.line[k].symbol[j++] = fileArr[i];
-			if(fileArr[i] == '\n')
-			{
-				k++;
-				j = 0;
-			}
+		text.line[strnum].strLength++;
+		if(fileArr[i] == '\n')
+			strnum++;
 	}
+	
+	for(int i = 0; i < text.numOfLines; i++)
+		text.line[i].symbol = calloc(text.line[i].strLength, sizeof(*(text.line[i].symbol)));
+	
+	int k = 0;
+	for(int i = 0; i < text.numOfLines; i++)
+	{
+		for(int j = 0; j < text.line[i].strLength; j++)
+			text.line[i].symbol[j] = fileArr[k++];
+	}
+	free(fileArr);
 	return text;
 }
 
@@ -117,7 +119,10 @@ void StrSort(TEXT text)
 		for(int j = 1; j < text.numOfLines - i; j++)
 		{
 			if(Compare(text.line[j - 1].symbol, text.line[j].symbol))
+			{
 				StrSwap(&text.line[j - 1].symbol, &text.line[j].symbol);
+				Swap(&text.line[j - 1].strLength, &text.line[j].strLength);
+			}
 		}
 	}	
 }
@@ -129,6 +134,15 @@ void StrSwap(wchar_t **str1, wchar_t **str2)
 	wchar_t *s = *str1;
 	*str1 = *str2;
 	*str2 = s;
+}
+
+void Swap(int *a, int *b)
+{
+	assert(a != NULL);
+	assert(b != NULL);
+	int t = *a;
+	*a = *b;
+	*b = t;
 }
 
 int Compare(wchar_t *str1, wchar_t *str2)
@@ -149,17 +163,11 @@ int Compare(wchar_t *str1, wchar_t *str2)
 void WriteText(char *path, TEXT text)
 {
 	assert(text.line != NULL);
-	FILE *file;
-	file = fopen(path, "a");
+	FILE *file = fopen(path, "a");
 	for(int i = 0; i < text.numOfLines; i++)
 	{
-		int c, j = 0;
-		while((c = text.line[i].symbol[j]) != '\n')
-		{
-			putc(c, file);
-			j++;
-		}
-		putc('\n', file);
+		for(int j = 0; j < text.line[i].strLength; j++)
+			putc(text.line[i].symbol[j], file);
 	}
 	fclose(file);
 }
