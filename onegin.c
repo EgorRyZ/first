@@ -17,11 +17,11 @@ typedef struct
 	int numOfLines;
 }TEXT;
 
-int NumOfLines(int *fileArr, int length);
+int NumOfLines(wchar_t *fileArr, int length);
 
 TEXT ReadText(char *path);
 
-TEXT TextStruct(int *fileArr, int length);
+TEXT TextStruct(wchar_t *fileArr, int length);
 
 void StrSort(TEXT text);
 
@@ -49,7 +49,7 @@ int main()
 	return 0;
 }
 
-int NumOfLines(int *fileArr, int length)
+int NumOfLines(wchar_t *fileArr, int length)
 {
 	int num = 0;
 	for(int i = 0; i < length; i++)
@@ -71,7 +71,7 @@ TEXT ReadText(char *path)
 	fstat(fileno(file), &statbuf);
 	int length = statbuf.st_size;
 	
-	int *fileArr = calloc(length, sizeof(*fileArr));
+	wchar_t *fileArr = malloc(length * sizeof(*fileArr));
 	int c = 0, i = 0;
 	while((c = getc(file)) != EOF)
 	{
@@ -84,11 +84,13 @@ TEXT ReadText(char *path)
 	return text;
 }
 
-TEXT TextStruct(int *fileArr, int length)
+TEXT TextStruct(wchar_t *fileArr, int length)
 {
 	TEXT text;
 	text.numOfLines = NumOfLines(fileArr, length);
-	text.line = calloc(text.numOfLines, sizeof(*(text.line)));
+	text.line = malloc(text.numOfLines * sizeof(*(text.line)));
+	for(int i = 0; i < text.numOfLines; i++)
+		text.line[i].strLength = 0;
 	
 	int strnum = 0;
 	for(int i = 0; i < length; i++)
@@ -98,16 +100,12 @@ TEXT TextStruct(int *fileArr, int length)
 			strnum++;
 	}
 	
-	for(int i = 0; i < text.numOfLines; i++)
-		text.line[i].symbol = calloc(text.line[i].strLength, sizeof(*(text.line[i].symbol)));
-	
-	int k = 0;
+	int p = 0;
 	for(int i = 0; i < text.numOfLines; i++)
 	{
-		for(int j = 0; j < text.line[i].strLength; j++)
-			text.line[i].symbol[j] = fileArr[k++];
+		text.line[i].symbol = fileArr + p;
+		p += text.line[i].strLength;
 	}
-	free(fileArr);
 	return text;
 }
 
@@ -167,7 +165,10 @@ void WriteText(char *path, TEXT text)
 	for(int i = 0; i < text.numOfLines; i++)
 	{
 		for(int j = 0; j < text.line[i].strLength; j++)
+		{
 			putc(text.line[i].symbol[j], file);
+		}
 	}
+	
 	fclose(file);
 }
